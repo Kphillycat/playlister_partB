@@ -1,7 +1,7 @@
 require 'debugger'
 
 class Artist
-	attr_accessor :name, :songs, :genres
+	attr_accessor :songs, :genres
 	@@count = []
 
 	def initialize
@@ -9,6 +9,17 @@ class Artist
 		@songs = []
 		@genres = []
 		@@count << self
+	end
+
+	#add name= to check not to create new object for same artist
+
+	def name=(name)
+		@name = name unless @@count.any? {|artist| artist.name == name}
+		@@count.uniq!
+	end
+
+	def name
+		@name
 	end
 
 	def songs_count

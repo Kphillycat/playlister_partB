@@ -3,6 +3,10 @@ require './lib/genre'
 require './lib/song'
 require 'debugger'
 
+ARTIST_NAME_REGEX = /((.*\w*) (?=\-))/
+SONG_NAME_REGEX = /(?<=\-).*(?=\[)/
+GENRE_NAME_REGEX = /\[.*\]/
+
 def debrackafy(word)
 	word.gsub!(/\[/,"").gsub!(/\]/, "")
 end
@@ -25,6 +29,15 @@ def create_objects_array(object_type, number_of_objects)
 	object_array
 end
 
+def create_artist_objects_hash(artist_name_array)
+	artist_name_hash = {}
+	artist_name_array.each do |name|
+		artist_name_hash[name.to_sym] = Artist.new
+		artist_name_hash[name.to_sym].name = name
+	end
+	artist_name_hash
+end
+
 def set_name_for_object_array(object_array, name_array)
 	object_array.each_with_index do |object, index|
 		object.name = name_array[index]
@@ -37,22 +50,21 @@ def add_genres_to_songs(song_objects_array, genre_objects_array)
 	end
 end
 
-def add_song_to_artist(artist_object_array, song_objects_array)
-	artist_object_array.each_with_index do |artist, index| 
-		artist.add_song(song_objects_array[index])
-	end
 
+def add_song_to_artist(artist_object_hash, song_objects_array, all_the_songs)
+	song_objects_array.each_with_index do |song, index|
+		artist_name = ARTIST_NAME_REGEX.match(all_the_songs[index])		
+		artist_object_hash[artist_name[0].strip.to_sym].add_song(song)
+	end
+	artist_object_hash
 end
 
-artist_name_regex = /((.*\w*) (?=\-))/
-song_name_regex = /(?<=\-).*(?=\[)/
-genre_name_regex = /\[.*\]/
 
 all_the_songs = grab_data_from_dir("data")
 
-artist_name_array = create_regex_format_array(artist_name_regex, all_the_songs)
-song_name_array = create_regex_format_array(song_name_regex, all_the_songs)
-genre_name_array = create_regex_format_array(genre_name_regex, all_the_songs)
+artist_name_array = create_regex_format_array(ARTIST_NAME_REGEX, all_the_songs)
+song_name_array = create_regex_format_array(SONG_NAME_REGEX, all_the_songs)
+genre_name_array = create_regex_format_array(GENRE_NAME_REGEX, all_the_songs)
 
 genre_name_array.collect do |genre|
 	debrackafy(genre)
@@ -60,14 +72,14 @@ end
 #remove the brackets from genre captured by the genre_array_regex
 
 #Step 1: Create new objects for each song, artist and genre
-artist_objects_array = create_objects_array(Artist, artist_name_array.length)
+artist_objects_hash = create_artist_objects_hash( artist_name_array)
 
 song_objects_array = create_objects_array(Song, song_name_array.length)
 
 genre_objects_array = create_objects_array(Genre, genre_name_array.length)
 
-#Step 2: Add name to artist, song, genre
-artist_objects_array = set_name_for_object_array(artist_objects_array, artist_name_array)
+
+#Step 2: Add name to song and genre.
 song_objects_array = set_name_for_object_array(song_objects_array, song_name_array)
 genre_objects_array = set_name_for_object_array(genre_objects_array, genre_name_array)
 
@@ -76,12 +88,7 @@ song_objects_array = add_genres_to_songs(song_objects_array, genre_objects_array
 
 #Step 4: Add song to artist
 
-artist_objects_array = add_song_to_artist(artist_objects_array, song_objects_array)
+artist_objects_hash = add_song_to_artist(artist_objects_hash, song_objects_array, all_the_songs)
 
+#Parsing and object data structure complete
 
-
-
-# ap artist_name_array
-# ap song_name_array
-# ap genre_name_array
-# ap all_the_songs
