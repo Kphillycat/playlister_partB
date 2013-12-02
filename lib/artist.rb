@@ -14,8 +14,7 @@ class Artist
 	#add name= to check not to create new object for same artist
 
 	def name=(name)
-		@name = name unless @@count.any? {|artist| artist.name == name}
-		@@count.uniq!
+		@name = name 
 	end
 
 	def name
@@ -29,10 +28,11 @@ class Artist
 	def add_song(new_song)
 		if new_song.genre
 			new_song.genre.artists << self 
+			genres << new_song.genre
 			new_song.genre.artists.uniq!
 		end
 		songs << new_song
-		genres << new_song.genre
+		
 	end
 
 	def self.reset_artists

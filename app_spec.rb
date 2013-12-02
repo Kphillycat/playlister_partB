@@ -90,5 +90,11 @@ describe "#add_song_to_artist" do
 
 		expect(add_song_to_artist(test_artist_hash, test_song_object_array, test_all_songs)[:"Kphilly"].genres[0].name).to eq("Hard Rock")
 	end
+
+	# describe "#pick_artist" do
+	# 	it "should return list of artist's songs and genres" do
+			
+	# 	end
+	# end
 end
 
